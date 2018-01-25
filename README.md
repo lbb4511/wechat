@@ -1,1 +1,2 @@
-# wechatServer
+# wechat
+My WeChat Backend Example
