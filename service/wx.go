@@ -1,4 +1,4 @@
-package wx
+package service
 
 import (
 	"crypto/sha1"
@@ -9,48 +9,65 @@ import (
 	"log"
 	"net/http"
 	"sort"
+	"strconv"
+	"time"
 
 	"github.com/clbanning/mxj"
+	"github.com/lbb4511/wechat/models"
 )
 
-type weixinQuery struct {
-	Signature    string `json:"signature"`
-	Timestamp    string `json:"timestamp"`
-	Nonce        string `json:"nonce"`
-	EncryptType  string `json:"encrypt_type"`
-	MsgSignature string `json:"msg_signature"`
-	Echostr      string `json:"echostr"`
+// client
+type client models.WeixinClient
+
+type Base struct {
+	FromUserName CDATAText
+	ToUserName   CDATAText
+	MsgType      CDATAText
+	CreateTime   CDATAText
 }
 
-type WeixinClient struct {
-	Token          string
-	Query          weixinQuery
-	Message        map[string]interface{}
-	Request        *http.Request
-	ResponseWriter http.ResponseWriter
-	Methods        map[string]func() bool
+type CDATAText struct {
+	Text string `xml:",innerxml"`
 }
 
-func NewClient(r *http.Request, w http.ResponseWriter, token string) (*WeixinClient, error) {
+type TextMessage struct {
+	XMLName xml.Name `xml:"xml"`
+	Base
+	Content CDATAText
+}
 
-	weixinClient := new(WeixinClient)
+func value2CDATA(v string) CDATAText {
+	return CDATAText{"<![CDATA[" + v + "]]>"}
+}
 
-	weixinClient.Token = token
-	weixinClient.Request = r
-	weixinClient.ResponseWriter = w
+func (b *Base) InitBaseData(w *client, msgtype string) {
 
-	weixinClient.initWeixinQuery()
+	b.FromUserName = value2CDATA(w.Message["ToUserName"].(string))
+	b.ToUserName = value2CDATA(w.Message["FromUserName"].(string))
+	b.CreateTime = value2CDATA(strconv.FormatInt(time.Now().Unix(), 10))
+	b.MsgType = value2CDATA(msgtype)
+}
 
-	if weixinClient.Query.Signature != weixinClient.signature() {
+func NewClient(r *http.Request, w http.ResponseWriter, token string) (*client, error) {
+
+	cl := new(client)
+
+	cl.Token = token
+	cl.Request = r
+	cl.ResponseWriter = w
+
+	cl.initWeixinQuery()
+
+	if cl.Query.Signature != cl.signature() {
 		return nil, errors.New("Invalid Signature.")
 	}
 
-	return weixinClient, nil
+	return cl, nil
 }
 
-func (this *WeixinClient) initWeixinQuery() {
+func (this *client) initWeixinQuery() {
 
-	var q weixinQuery
+	var q models.WeixinQuery
 
 	q.Nonce = this.Request.URL.Query().Get("nonce")
 	q.Echostr = this.Request.URL.Query().Get("echostr")
@@ -62,7 +79,7 @@ func (this *WeixinClient) initWeixinQuery() {
 	this.Query = q
 }
 
-func (this *WeixinClient) signature() string {
+func (this *client) signature() string {
 
 	strs := sort.StringSlice{this.Token, this.Query.Timestamp, this.Query.Nonce}
 	sort.Strings(strs)
@@ -75,7 +92,7 @@ func (this *WeixinClient) signature() string {
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
-func (this *WeixinClient) initMessage() error {
+func (this *client) initMessage() error {
 
 	body, err := ioutil.ReadAll(this.Request.Body)
 
@@ -106,7 +123,7 @@ func (this *WeixinClient) initMessage() error {
 	return nil
 }
 
-func (this *WeixinClient) text() {
+func (this *client) text() {
 
 	inMsg, ok := this.Message["Content"].(string)
 
@@ -131,7 +148,7 @@ func (this *WeixinClient) text() {
 	this.ResponseWriter.Write(replyXml)
 }
 
-func (this *WeixinClient) Run() {
+func (this *client) Run() {
 
 	err := this.initMessage()
 

@@ -2,61 +2,65 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"regexp"
 	"time"
 
-	"github.com/lbb4511/wechat/wx"
+	"github.com/lbb4511/wechat/controller"
+	"github.com/lbb4511/wechat/setting"
 )
 
-const (
-	logLevel = "dev"
-	port     = 8098
-	token    = "asgdyg3wyw4qfasd2gyw3"
-)
+type httpHandler struct{}
 
-func get(w http.ResponseWriter, r *http.Request) {
-
-	client, err := wx.NewClient(r, w, token)
-
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(403)
-		return
-	}
-
-	if len(client.Query.Echostr) > 0 {
-		w.Write([]byte(client.Query.Echostr))
-		return
-	}
-
-	w.WriteHeader(403)
-	return
+type WebController struct {
+	Function func(http.ResponseWriter, *http.Request)
+	Method   string
+	Pattern  string
 }
 
-func post(w http.ResponseWriter, r *http.Request) {
+var mux []WebController
 
-	client, err := wx.NewClient(r, w, token)
-
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(403)
-		return
-	}
-
-	client.Run()
-	return
+func init() {
+	mux = append(mux, WebController{controller.Post, "POST", "^/wechat"})
+	mux = append(mux, WebController{controller.Get, "GET", "^/wechat"})
 }
 
 func main() {
 	server := http.Server{
-		Addr:           fmt.Sprintf(":%d", port),
+		Addr:           fmt.Sprintf(":%d", setting.Conf.Port),
 		Handler:        &httpHandler{},
 		ReadTimeout:    5 * time.Second,
 		WriteTimeout:   5 * time.Second,
 		MaxHeaderBytes: 0,
 	}
 
-	log.Println(fmt.Sprintf("Listen: %d", port))
+	log.Println(fmt.Sprintf("Listen: %d", setting.Conf.Port))
 	log.Fatal(server.ListenAndServe())
+}
+
+func (*httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
+	t := time.Now()
+
+	for _, webController := range mux {
+
+		if m, _ := regexp.MatchString(webController.Pattern, r.URL.Path); m {
+
+			if r.Method == webController.Method {
+
+				webController.Function(w, r)
+
+				go setting.WriteLog(r, t, "match", webController.Pattern)
+
+				return
+			}
+		}
+	}
+
+	go setting.WriteLog(r, t, "unmatch", "")
+
+	io.WriteString(w, "")
+	return
 }
