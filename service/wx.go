@@ -148,6 +148,31 @@ func (this *client) text() {
 	this.ResponseWriter.Write(replyXml)
 }
 
+func (this *client) image() {
+
+	inMsg, ok := this.Message["Content"].(string)
+
+	if !ok {
+		return
+	}
+
+	var reply TextMessage
+
+	reply.InitBaseData(this, "imageimage")
+	reply.Content = value2CDATA(fmt.Sprintf("我收到的是：%s", inMsg))
+
+	replyXml, err := xml.Marshal(reply)
+
+	if err != nil {
+		log.Println(err)
+		this.ResponseWriter.WriteHeader(403)
+		return
+	}
+
+	this.ResponseWriter.Header().Set("Content-Type", "text/xml")
+	this.ResponseWriter.Write(replyXml)
+}
+
 func (this *client) Run() {
 
 	err := this.initMessage()
@@ -169,6 +194,9 @@ func (this *client) Run() {
 	switch MsgType {
 	case "text":
 		this.text()
+		break
+	case "image":
+		this.image()
 		break
 	default:
 		break

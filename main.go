@@ -23,8 +23,8 @@ var mux []WebController
 
 func main() {
 
-	mux = append(mux, WebController{Post, "POST", "^/wechat"})
-	mux = append(mux, WebController{Get, "GET", "^/wechat"})
+	mux = append(mux, WebController{Post, "POST", "^/"})
+	mux = append(mux, WebController{Get, "GET", "^/"})
 
 	server := http.Server{
 		Addr:           fmt.Sprintf(":%d", Conf.Port),

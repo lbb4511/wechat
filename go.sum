@@ -1,0 +1,9 @@
+github.com/clbanning/mxj v0.0.0-20160728125224-98670cb0225a h1:WXaT3em/fcYhjOTWu+EUgBoS/RBrSbuMwHVGHwY67I0=
+github.com/clbanning/mxj v0.0.0-20160728125224-98670cb0225a/go.mod h1:BVjHeAH+rl9rs6f+QIpeRl0tfu10SXn1pUSa5PVGJng=
+github.com/fatih/structs v0.0.0-20160807235529-dc3312cb1a45 h1:SmGLF6DwUks6Rhs/aehI/q5S47HQpC/fE9TtQjunurs=
+github.com/fatih/structs v0.0.0-20160807235529-dc3312cb1a45/go.mod h1:9NiDSp5zOcgEDl+j00MP/WkGVPOlPRLejGD8Ga6PJ7M=
+github.com/lbb4511/wechat v0.0.0-20190321025912-e06354870b7b h1:fq7CEKpY/zxlBdtcBK5/8kWgY7/F3pri/KErWUFC5/g=
+github.com/lbb4511/wechat v0.0.0-20190321025912-e06354870b7b/go.mod h1:Vq+KiGFggddqUptnpm6V9lRsdTPho+1xs19AosESsII=
+gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
+gopkg.in/yaml.v2 v2.2.2 h1:ZCJp+EgiOT7lHqUV2J862kp8Qj64Jo6az82+3Td9dZw=
+gopkg.in/yaml.v2 v2.2.2/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
