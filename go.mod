@@ -1,10 +1,8 @@
-module github.com/leeeboo/wechat
+module github.com/lbb4511/wechat
 
-go 1.12
+go 1.14
 
 require (
-	github.com/clbanning/mxj v0.0.0-20160728125224-98670cb0225a
-	github.com/fatih/structs v0.0.0-20160807235529-dc3312cb1a45
-	github.com/lbb4511/wechat v0.0.0-20190321025912-e06354870b7b
-	gopkg.in/yaml.v2 v2.2.2
+	github.com/clbanning/mxj v1.8.4
+	gopkg.in/yaml.v2 v2.3.0
 )
